@@ -11,7 +11,6 @@ dependencies:
   cupertino_icons: ^1.0.8
   flutter_bloc: ^8.1.6
   deepcopy: ^1.1.2
-
   font_awesome_flutter: ^10.8.0
 dev_dependencies:
   flutter_test:
