@@ -45,7 +45,7 @@ class MyApp extends StatelessWidget {
 
       "Game": {
       "width":8,
-      "height":7,
+      "height":8,
       "Grid": [
       [
       {"x": 0, "y": 0, "type": "laserGenerator","reflection":45},
@@ -59,7 +59,7 @@ class MyApp extends StatelessWidget {
       ],
       [
       {"x": 1, "y": 0, "type": "empty"},
-      {"x": 1, "y": 1, "type": "framingMirror"},
+      {"x": 1, "y": 1, "type": "wall"},
       {"x": 1, "y": 2, "type": "empty"},
       {"x": 1, "y": 3, "type": "empty"},
       {"x": 1, "y": 4, "type": "empty"},
@@ -97,15 +97,26 @@ class MyApp extends StatelessWidget {
       {"x": 4, "y": 6, "type": "empty"},
       {"x": 4, "y": 7, "type": "empty"}
       ],
+        [
+          {"x": 5, "y": 0, "type": "empty"},
+          {"x": 5, "y": 1, "type": "empty"},
+          {"x": 5, "y": 2, "type": "empty"},
+          {"x": 5, "y": 3, "type": "empty"},
+          {"x": 5, "y": 4, "type": "empty"},
+          {"x": 5, "y": 5, "type": "empty"},
+          {"x": 5, "y": 6, "type": "empty"},
+          {"x": 5, "y": 7, "type": "empty"}
+        ],
+
       [
       {"x": 6, "y": 0, "type": "empty"},
-      {"x": 6, "y": 1, "type": "framingMirror"},
+      {"x": 6, "y": 1, "type": "wall"},
       {"x": 6, "y": 2, "type": "empty"},
       {"x": 6, "y": 3, "type": "empty"},
       {"x": 6, "y": 4, "type": "empty"},
       {"x": 6, "y": 5, "type": "empty"},
-      {"x": 6, "y": 6, "type": "framingMirror"},
-      {"x": 6, "y": 7, "type": "empty"}
+      {"x": 6, "y": 6, "type": "empty"},
+      {"x": 6, "y": 7, "type": "framingMirror","maxX":7,"minX":5,"maxY":6,"minY":6,"reflection":45}
       ],
       [
       {"x": 7, "y": 0, "type": "goal"},
@@ -115,13 +126,13 @@ class MyApp extends StatelessWidget {
       {"x": 7, "y": 4, "type": "empty"},
       {"x": 7, "y": 5, "type": "empty"},
       {"x": 7, "y": 6, "type": "empty"},
-      {"x": 7, "y": 7, "type": "constantMirror","reflection":45}
+      {"x": 7, "y": 7, "type": "empty"}
       ]
       ],
 
       "laser": [
         // Starting point (laser generator)
-          { "x": 0, "y":0, "direction":"down" }, // Next point (moving right)
+           { "x": 0, "y":0, "direction":"down" }, // Next point (moving right)
          // ... and so on
       ]
       }
