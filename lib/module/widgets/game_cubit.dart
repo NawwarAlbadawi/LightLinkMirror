@@ -113,7 +113,7 @@ class GameCubit extends Cubit<GameState> {
         for (var e in laserPath) {
           int x = e.x;
           int y = e.y;
-
+             printGrid(grid);
           if (gameModel.game!.grid![x][y] is Empty) {
             gameModel.game!.grid![x][y] =
                 Laser(x: x, y: y, currentDirection: e.currentDirection);
@@ -204,59 +204,53 @@ class GameCubit extends Cubit<GameState> {
     initValue();
   }
 
+
+  Set<List<List<Cell>>>states={} ;
   void getNextState(List<List<Cell>>gr){
+    states.add(calculateLaserPath(gameModel.game!.laser![0].x, gameModel.game!.laser![0].y, gameModel.game!.laser![0].currentDirection!, gr));
+    if(!isWin) {
+      printGrid(gr);
+      //calculateLaserPath(gameModel.game!.laser![0].x, gameModel.game!.laser![0].y, gameModel.game!.laser![0].currentDirection!, gr);
 
-    Set<List<List<Cell>>>states={} ;
-   calculateLaserPath(gameModel.game!.laser![0].x, gameModel.game!.laser![0].y, gameModel.game!.laser![0].currentDirection!, gr);
-   //states.add(calculateLaserPath(gameModel.game!.laser![0].x, gameModel.game!.laser![0].y, gameModel.game!.laser![0].currentDirection!, gr));
-   for (var e in laserPath) {
-     int x = e.x;
-     int y = e.y;
+      for (var e in laserPath) {
+        int x = e.x;
+        int y = e.y;
 
 
-       if(!isVisited[x][y]){
-     if (gr[x][y] is FixedMirror45) {
+        if (!isVisited[x][y]) {
+          if (gr[x][y] is FixedMirror45) {
+            Mirror mirror = gr[x][y] as Mirror;
 
-       gameModel.game!.grid![x][y] = FixedMirror45(x: x, y: y, reflection: 315);
-       gr=gameModel.game!.grid!.map((row)=>row.map((cell)=>cell).toList()).toList();
-       states.add(calculateLaserPath(gameModel.game!.laser![0].x, gameModel.game!.laser![0].y, gameModel.game!.laser![0].currentDirection!, gr));
-       if(isWin)
-         return;
-       gameModel.game!.grid![x][y] = FixedMirror45(x: x, y: y, reflection: 135);
-       gr=gameModel.game!.grid!.map((row)=>row.map((cell)=>cell).toList()).toList();
-       states.add(calculateLaserPath(gameModel.game!.laser![0].x, gameModel.game!.laser![0].y, gameModel.game!.laser![0].currentDirection!, gr));
-       if(isWin)
-         return;
-       gameModel.game!.grid![x][y] = FixedMirror45(x: x, y: y, reflection: 270);
-       gr=gameModel.game!.grid!.map((row)=>row.map((cell)=>cell).toList()).toList();
-       states.add(calculateLaserPath(gameModel.game!.laser![0].x, gameModel.game!.laser![0].y, gameModel.game!.laser![0].currentDirection!, gr));
-       if(isWin)
-         return;
-       gameModel.game!.grid![x][y] = FixedMirror45(x: x, y: y, reflection: 45);
-       gr=gameModel.game!.grid!.map((row)=>row.map((cell)=>cell).toList()).toList();
-       states.add(calculateLaserPath(gameModel.game!.laser![0].x, gameModel.game!.laser![0].y, gameModel.game!.laser![0].currentDirection!, gr));
-       if(isWin)
-         return;
-       gameModel.game!.grid![x][y] = FixedMirror45(x: x, y: y, reflection: 90);
-       gr=gameModel.game!.grid!.map((row)=>row.map((cell)=>cell).toList()).toList();
-       states.add(calculateLaserPath(gameModel.game!.laser![0].x, gameModel.game!.laser![0].y, gameModel.game!.laser![0].currentDirection!, gr));
-       if(isWin)
-         return;
-     }
-     isVisited[x][y]=true;
-       }
+
+            gr[x][y] = FixedMirror45(x: x, y: y, reflection: (mirror.reflection + 45) % 360);
+            getNextState(gr);
+            gr[x][y] = FixedMirror45(x: x, y: y, reflection: (mirror.reflection + 90) % 360);
+            getNextState(gr);
+            gr[x][y] = FixedMirror45(x: x, y: y, reflection: (mirror.reflection + 180)%360);
+            getNextState(gr);
+            gr[x][y] = FixedMirror45(x: x, y: y, reflection: (mirror.reflection+270)%360);
+            getNextState(gr);
+          }
+          isVisited[x][y] = true;
+        }
+        else {
+          states.forEach((v){
+            stack.push(v);
+          });
+          //Dfs();
+        }
+
+      }
     }
 
+    return ;
 
 
 
-      states.forEach((v){
-        stack.push(v);
-      });
-    Dfs();
 
-}
 
+
+  }
   //gameModel.game!.grid![mirror.x][mirror.y]=FixedMirror45(x: mirror.x, y:mirror.y, reflection:mirror.reflection);
 
   void Dfs()
@@ -433,48 +427,57 @@ class Stack<T> {
 
 
 
+
+
 // void getNextState(List<List<Cell>>gr){
-//   states.add(calculateLaserPath(gameModel.game!.laser![0].x, gameModel.game!.laser![0].y, gameModel.game!.laser![0].currentDirection!, gr));
-//   if(!states.contains(gr)||!isWin) {
-//     printGrid(gr);
-//     //calculateLaserPath(gameModel.game!.laser![0].x, gameModel.game!.laser![0].y, gameModel.game!.laser![0].currentDirection!, gr);
 //
-//     for (var e in laserPath) {
-//       int x = e.x;
-//       int y = e.y;
+//   Set<List<List<Cell>>>states={} ;
+//   calculateLaserPath(gameModel.game!.laser![0].x, gameModel.game!.laser![0].y, gameModel.game!.laser![0].currentDirection!, gr);
+//   //states.add(calculateLaserPath(gameModel.game!.laser![0].x, gameModel.game!.laser![0].y, gameModel.game!.laser![0].currentDirection!, gr));
+//   for (var e in laserPath) {
+//     int x = e.x;
+//     int y = e.y;
 //
 //
-//       if (!isVisited[x][y]) {
-//         if (gr[x][y] is FixedMirror45) {
-//           Mirror mirror = gr[x][y] as Mirror;
-//           gr[x][y] = FixedMirror45(x: x, y: y, reflection: (mirror.reflection));
-//           getNextState(gr);
-//           gr[x][y] = FixedMirror45(x: x, y: y, reflection: (mirror.reflection + 45) % 360);
-//           getNextState(gr);
-//           gr[x][y] = FixedMirror45(x: x, y: y, reflection: (mirror.reflection + 90) % 360);
-//           getNextState(gr);
-//           gr[x][y] = FixedMirror45(x: x, y: y, reflection: (mirror.reflection + 180)%360);
-//           getNextState(gr);
-//           gr[x][y] = FixedMirror45(x: x, y: y, reflection: (mirror.reflection+270)%360);
-//           getNextState(gr);
-//         }
-//         isVisited[x][y] = true;
+//     if(!isVisited[x][y]){
+//       if (gr[x][y] is FixedMirror45) {
+//
+//         gameModel.game!.grid![x][y] = FixedMirror45(x: x, y: y, reflection: 315);
+//         gr=gameModel.game!.grid!.map((row)=>row.map((cell)=>cell).toList()).toList();
+//         states.add(calculateLaserPath(gameModel.game!.laser![0].x, gameModel.game!.laser![0].y, gameModel.game!.laser![0].currentDirection!, gr));
+//         if(isWin)
+//           return;
+//         gameModel.game!.grid![x][y] = FixedMirror45(x: x, y: y, reflection: 135);
+//         gr=gameModel.game!.grid!.map((row)=>row.map((cell)=>cell).toList()).toList();
+//         states.add(calculateLaserPath(gameModel.game!.laser![0].x, gameModel.game!.laser![0].y, gameModel.game!.laser![0].currentDirection!, gr));
+//         if(isWin)
+//           return;
+//         gameModel.game!.grid![x][y] = FixedMirror45(x: x, y: y, reflection: 270);
+//         gr=gameModel.game!.grid!.map((row)=>row.map((cell)=>cell).toList()).toList();
+//         states.add(calculateLaserPath(gameModel.game!.laser![0].x, gameModel.game!.laser![0].y, gameModel.game!.laser![0].currentDirection!, gr));
+//         if(isWin)
+//           return;
+//         gameModel.game!.grid![x][y] = FixedMirror45(x: x, y: y, reflection: 45);
+//         gr=gameModel.game!.grid!.map((row)=>row.map((cell)=>cell).toList()).toList();
+//         states.add(calculateLaserPath(gameModel.game!.laser![0].x, gameModel.game!.laser![0].y, gameModel.game!.laser![0].currentDirection!, gr));
+//         if(isWin)
+//           return;
+//         gameModel.game!.grid![x][y] = FixedMirror45(x: x, y: y, reflection: 90);
+//         gr=gameModel.game!.grid!.map((row)=>row.map((cell)=>cell).toList()).toList();
+//         states.add(calculateLaserPath(gameModel.game!.laser![0].x, gameModel.game!.laser![0].y, gameModel.game!.laser![0].currentDirection!, gr));
+//         if(isWin)
+//           return;
 //       }
-//       else {
-//         states.forEach((v){
-//           stack.push(v);
-//         });
-//         //Dfs();
-//       }
-//
+//       isVisited[x][y]=true;
 //     }
 //   }
 //
-//   return ;
 //
 //
 //
-//
-//
+//   states.forEach((v){
+//     stack.push(v);
+//   });
+//   Dfs();
 //
 // }
