@@ -53,9 +53,9 @@ class GameViewBody extends StatelessWidget {
                   child: GridView.builder(gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 8),
                       itemCount: 64,
                       itemBuilder: (context,index){
-                        int row = index ~/ cubit.grid[0].length;
-                        int col = index % cubit.grid[0] .length;
-                         cell = cubit.grid[row][col];
+                        int row = index ~/ cubit.gameModel.game !.grid![0].length;
+                        int col = index % cubit.gameModel.game !.grid![0].length;
+                         cell = cubit.gameModel.game !.grid![row][col];
                         return Container(
                           decoration:  BoxDecoration(
                             color:Colors.lightGreen,
@@ -114,7 +114,9 @@ class GameViewBody extends StatelessWidget {
       case Laser _:
         return const  Icon(Icons.flash_on,color: Colors.yellow,size: 35,);// Laser generator
       default:
-        return const Icon(FontAwesomeIcons.bullseye,color: Colors.red,); // Unknown cell type
+        return IconButton( onPressed: (){
+
+        } ,icon: const Icon(FontAwesomeIcons.bullseye,color: Colors.red,)); // Unknown cell type
     }
   }
 }

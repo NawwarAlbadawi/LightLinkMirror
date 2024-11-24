@@ -211,7 +211,7 @@ class Game {
 
     });}
 
-    printGrid(grid!);
+
 
   }
   int? width;
@@ -248,15 +248,17 @@ void printGrid(List<List<Cell>> grid) {
    cellRepresentation +=getCellRepresentation(cell)+" ";
 // Print cell representation with space
     }
-    print(cellRepresentation); // Print newline for next row
+    print(cellRepresentation);
+   // Print newline for next row
   }
+  print('-----------------------');
 }
 
 String getCellRepresentation(Cell cell) {
   if (cell is Empty) {
     return '.'; // Representation for Empty cell
   } else if (cell is FixedMirror45) {
-    return '/'; // Representation for FixedMirror45 cell
+    return '${cell.reflection}'; // Representation for FixedMirror45 cell
   } else if (cell is Laser) {
     return 'L'; // Representation for Laser cell
   } else if (cell is Goal) {
