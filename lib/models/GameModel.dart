@@ -184,7 +184,7 @@ class Game {
               row.add(ConstantMirror(x: x, y: y, reflection: cellData['reflection']));
               break;
             case 'framingMirror':
-            row.add(FramingMirror(x: x, y: y,reflection: 45,minX: 5,maxX:7,maxY: 6,minY: 6 ));
+            row.add(FramingMirror(x: x, y: y,reflection: cellData['reflection'],minX: cellData['minX'],maxX:cellData['maxX'],maxY: cellData['maxY'],minY: cellData['minY'] ));
               break;
             case 'laserGenerator':
               row.add(LaserGenerator(x: x, y: y, reflection: cellData['reflection']));

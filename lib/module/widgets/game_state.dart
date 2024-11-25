@@ -13,8 +13,7 @@ final class ChangeSourceDirectionState extends GameState {
 
 }
 
-final class GameWon extends GameState {
+final class GameWon extends GameState {}
+final class GameLose extends GameState {}
 
-}
-
-
+final class FindingPathState extends GameState {}

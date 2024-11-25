@@ -68,7 +68,7 @@ class MyApp extends StatelessWidget {
       {"x": 1, "y": 7, "type": "empty"}
       ],
       [
-      {"x": 2, "y": 0, "type": "fixedMirror45","reflection":0},
+      {"x": 2, "y": 0, "type": "fixedMirror45","reflection":45},
       {"x": 2, "y": 1, "type": "empty"},
       {"x": 2, "y": 2, "type": "constantMirror","reflection":45},
       {"x": 2, "y": 3, "type": "empty"},
@@ -126,7 +126,7 @@ class MyApp extends StatelessWidget {
       {"x": 7, "y": 4, "type": "empty"},
       {"x": 7, "y": 5, "type": "empty"},
       {"x": 7, "y": 6, "type": "empty"},
-      {"x": 7, "y": 7, "type": "constantMirror","reflection":45}
+      {"x": 7, "y": 7,  "type":"framingMirror","maxX":7,"minX":5,"maxY":6,"minY":6,"reflection":45}
       ]
       ],
 

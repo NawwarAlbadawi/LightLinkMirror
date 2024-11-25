@@ -23,13 +23,16 @@ class GameViewBody extends StatelessWidget {
 
 
     return BlocProvider(
-      create: (context)=>GameCubit(gameModel)..initValue(),
+      create: (context)=>GameCubit(gameModel),
       child: BlocConsumer<GameCubit,GameState>(
         listener: (context,state){
+print(state);
           if(state is GameWon)
             {
+
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
+
                   content: const  Text('Congraltion You win!'),
                   backgroundColor: Colors.green,
                   behavior: SnackBarBehavior.floating,
@@ -40,9 +43,25 @@ class GameViewBody extends StatelessWidget {
                 ),
               );
             }
+          else if(state is GameLose)
+            {
+
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: const  Text('Lost Game!'),
+                  backgroundColor: Colors.red,
+                  behavior: SnackBarBehavior.floating,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  elevation: 6,
+                ),
+              );
+            }
         },
         builder: (context,state) {
-          var cubit=GameCubit.get(context);
+
+            var cubit=GameCubit.get(context);
 
           return Column(
 
@@ -71,7 +90,25 @@ class GameViewBody extends StatelessWidget {
 
                           child:   _getCellWidget(cell,cubit),
                         );})
-              )
+              ),
+              GestureDetector(
+                onTap: (){cubit.initValue();},
+              child: Container(
+                width: 200,
+                decoration: BoxDecoration(
+                  color: Colors.grey.withOpacity(0.4),
+                  borderRadius: BorderRadius.circular(15)
+                ),
+                child:const  Text('Start',
+
+                  style: TextStyle(
+                  fontSize: 35,
+                    color: Colors.blue
+
+                ),
+                  textAlign: TextAlign.center,
+                ),
+              ),)
             ],
           );
         }
@@ -88,7 +125,7 @@ class GameViewBody extends StatelessWidget {
         return IconButton(
             onPressed: (){
 
-          cubit.pressOnMirror(cell);
+         // cubit.pressOnMirror(cell);
 
         },
             icon:  Transform.rotate(
@@ -109,7 +146,7 @@ class GameViewBody extends StatelessWidget {
         return const  Icon(Icons.block); // Wall
       case LaserGenerator _:
         return IconButton( onPressed:(){
-           cubit.changeSourceDirection();
+          // cubit.changeSourceDirection();
         } , icon: const  Icon(FontAwesomeIcons.lightbulb,size: 30,color: Colors.white,));
       case Laser _:
         return const  Icon(Icons.flash_on,color: Colors.yellow,size: 35,);// Laser generator
