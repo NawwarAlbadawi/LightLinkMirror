@@ -9,6 +9,7 @@ dependencies:
   flutter:
     sdk: flutter
   cupertino_icons: ^1.0.8
+  collection: ^1.18.0
   flutter_bloc: ^8.1.6
   deepcopy: ^1.1.2
   font_awesome_flutter: ^10.8.0

@@ -46,6 +46,7 @@ class MyApp extends StatelessWidget {
       "Game": {
       "width":8,
       "height":8,
+       "cost":0,
       "Grid": [
       [
       {"x": 0, "y": 0, "type": "laserGenerator","reflection":45},

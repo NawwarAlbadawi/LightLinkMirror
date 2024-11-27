@@ -1,6 +1,5 @@
-
+import 'package:collection/collection.dart';
 import 'dart:collection';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:lightlink/models/GameModel.dart';
@@ -8,9 +7,7 @@ import 'package:lightlink/models/Mirror.dart';
 import 'package:lightlink/models/empty.dart';
 import 'package:lightlink/models/fixedMirror45.dart';
 import '../../models/cell.dart';
-import '../../models/constantMirror.dart';
 import '../../models/framing_mirror.dart';
-import '../../models/goal.dart';
 import '../../models/laserGenerator.dart';
 import '../../models/leaser.dart';
 import '../../models/wall.dart';
@@ -19,32 +16,36 @@ part 'game_state.dart';
 class GameCubit extends Cubit<GameState> {
   GameCubit(this.gameModel) : super(GameInitial());
 
-  late List<Laser> laserPath=[];
+
   final  GameModel gameModel;
-  List<List<Cell>>gg=[];
+  late Game gameState;
+
+  PriorityQueue<Game> stateQueue = PriorityQueue((a, b) => a.cost!.compareTo(b.cost!));
+
    bool isWin=false;
+
   List<List<bool>> isVisited = List.generate( 8, (i) => List.generate(8, (j) => false), );
    static  GameCubit get (context)=>BlocProvider.of(context);
+   List<List<Cell>>gridToPrint=[];
+   void init ()
+   {
+     gridToPrint=gameModel.game!.grid!.map((row)=>row.map((cell)=>cell).toList()).toList();   }
    initValue()
    {
 
-gg=gameModel.game!.grid!.map((row)=>row.map((cell)=>cell).toList()).toList();
-calculateLaserPath(gameModel.game!.laser![0].x, gameModel.game!.laser![0].y, gameModel.game!.laser![0].currentDirection!, gg);
-getNextState(gg);
+gameState =gameModel.game!.deepCopy();
+calculateLaserPath(gameModel.game!.laserPath!.first.x, gameModel.game!.laserPath!.first.y, gameModel.game!.laserPath!.first.currentDirection!, gameState);
+Dfs(gameState);
 
 
    }
-  void calculateLaserPath(int x,int y ,Direction direction , List<List<Cell>> grid){
-
-     laserPath=[];
+  void calculateLaserPath(int x,int y ,Direction direction , Game state){
 
     int currentX=x;
     int currentY=y;
-
     while (currentX<8&& currentX>=0&& currentY<=8&& currentY>=0) {
-      if (grid[currentX][currentY]is Empty) {
-        laserPath.add(
-            Laser(x: currentX, y: currentY, currentDirection: direction));
+      if (state.grid![currentX][currentY]is Empty) {
+        state.laserPath!.add(Laser(x: currentX, y: currentY, currentDirection: direction));
         if (direction case Direction.up) {
           currentX--;
         }
@@ -56,12 +57,13 @@ getNextState(gg);
           currentY++;
         }
       }
-      else if (grid[currentX][currentY] is Wall) {
+      else if (state.grid![currentX][currentY] is Wall) {
         currentX = -1;
       }
-      else if (grid[currentX][currentY] is Mirror) {
-        laserPath.add(Laser(x: currentX, y: currentY, currentDirection: direction));
-        Mirror mirror = grid[currentX][currentY] as Mirror;
+      else if (state.grid![currentX][currentY] is Mirror) {
+
+       state. laserPath!.add(Laser(x: currentX, y: currentY, currentDirection: direction));
+        Mirror mirror = state.grid![currentX][currentY] as Mirror;
 
         Map<String, dynamic>m = {};
         m = getXandY(mirror: mirror,
@@ -71,17 +73,18 @@ getNextState(gg);
         if (m['x'] == currentX && m['y'] == currentY) {
           break;
         }
+        else {
         currentX = m['x']!;
         currentY = m['y']!;
         direction = m['direction'];
         if (currentX < gameModel.game!.height! && currentX >= 0 &&
             currentY <= gameModel.game!.height! && currentY >= 0 &&
-            grid[currentX][currentY]is Empty) {
-          laserPath.add(Laser(x: currentX, y: currentY, currentDirection: direction));
-        }
+           state.grid![currentX][currentY]is Empty) {
+      //    state.laserPath!.add(Laser(x: currentX, y: currentY, currentDirection: direction));
+        }}
       }
-      else if (grid[currentX][currentY]is Laser) {
-        Laser laser = grid[currentX][currentY] as Laser;
+      else if (state.grid![currentX][currentY]is Laser) {
+        Laser laser = state.grid![currentX][currentY] as Laser;
         if (laser.currentDirection == Direction.down) {
           currentX++;
         } else if (laser.currentDirection == Direction.right) {
@@ -94,7 +97,7 @@ getNextState(gg);
           currentY--;
         }
       }
-      else if (grid[currentX][currentY] is LaserGenerator) {
+      else if (state.grid![currentX][currentY] is LaserGenerator) {
         if (direction == Direction.left) {
           currentY--;
         }
@@ -111,28 +114,28 @@ getNextState(gg);
       }
       else {
         isWin = true;
-        for (var e in laserPath) {
+
+        for (var e in state.laserPath!) {
           int x = e.x;
           int y = e.y;
           if (gameModel.game!.grid![x][y] is Empty) {
             gameModel.game!.grid![x][y] = Laser(x: x, y: y, currentDirection: e.currentDirection);
           }
         }
-        gameModel.game!.grid=grid;
-
-
+        gameModel.game!.grid=state.grid;
        break ;
       }
     }
 
 
-     for (var e in laserPath) {
+     for (var e in state.laserPath!) {
        int x = e.x;
        int y = e.y;
 
-       if(grid[x][y] is Empty){
-         grid[x][y]=Laser(x: x, y: y, currentDirection:e.currentDirection);}
+       if(state.grid![x][y] is Empty){
+         state.grid![x][y]=Laser(x: x, y: y, currentDirection:e.currentDirection);}
      }
+     gridToPrint=state.grid!.map((row)=>row.map((cell)=>cell).toList()).toList();
 
 
   }
@@ -254,37 +257,49 @@ return FramingMirror(x: mirror.x, y: mirror.y,reflection: mirror.reflection,minY
   }
 
 
-  void getNextState(List<List<Cell>>gr){
+  void getNextState(Game state){
 
-    List<List<List<Cell>>>states=[] ;
+    List<Game>states=[] ;
+
+
+
 
     //states.add(calculateLaserPath(gameModel.game!.laser![0].x, gameModel.game!.laser![0].y, gameModel.game!.laser![0].currentDirection!, gr));
-    for (var e in laserPath) {
+    for (var e in state.laserPath!)
+      {
       int x = e.x;
       int y = e.y;
 
       if(!isVisited[x][y]){
-        if (gr[x][y] is FixedMirror45) {
-
-        gr=  gameModel.game!.grid!.map((row)=>row.map((cell)=>cell).toList()).toList();
-          gr[x][y]= FixedMirror45(x: x, y: y, reflection: 315);
-          states.add(gr);
+        if (state.grid![x][y] is FixedMirror45) {
 
 
-        gr=  gameModel.game!.grid!.map((row)=>row.map((cell)=>cell).toList()).toList();
-          gr[x][y]=FixedMirror45(x: x, y: y, reflection: 135);
-          states.add(gr);
 
-        gr=  gameModel.game!.grid!.map((row)=>row.map((cell)=>cell).toList()).toList();
-          gr[x][y]=FixedMirror45(x: x, y: y, reflection: 270);
-          states.add(gr);
-        gr=  gameModel.game!.grid!.map((row)=>row.map((cell)=>cell).toList()).toList();
-          gr[x][y]=   FixedMirror45(x: x, y: y, reflection: 45);
-          states.add(gr);
+            Game  childState = gameModel.game!.deepCopy();
+          childState.grid![x][y]= FixedMirror45(x: x, y: y, reflection: 135);
+          childState.cost=calTheCost(childState: childState, fatherChild: state);
+          states.add(childState);
 
-        gr=  gameModel.game!.grid!.map((row)=>row.map((cell)=>cell).toList()).toList();
-          gr[x][y]=FixedMirror45(x: x, y: y, reflection: 90);
-          states.add(gr);
+
+          childState=  gameModel.game!.deepCopy();
+          childState.grid![x][y]=FixedMirror45(x: x, y: y, reflection: 315);
+            childState.cost=calTheCost(childState: childState, fatherChild: state)+state.cost!;
+          states.add(childState);
+
+            childState=  gameModel.game!.deepCopy();
+            childState.grid![x][y]=FixedMirror45(x: x, y: y, reflection: 270);
+            childState.cost=calTheCost(childState: childState, fatherChild: state)+state.cost!;
+           states.add(childState);
+
+            childState=  gameModel.game!.deepCopy();
+            childState.grid![x][y]=   FixedMirror45(x: x, y: y, reflection: 45);
+            childState.cost=calTheCost(childState: childState, fatherChild: state)+state.cost!;
+          states.add(childState);
+
+            childState=  gameModel.game!.deepCopy();
+            childState.grid![x][y]=FixedMirror45(x: x, y: y, reflection: 90);
+            childState.cost=calTheCost(childState: childState, fatherChild: state)+state.cost!;
+          states.add(childState);
         isVisited[x][y]=true;
 
         }
@@ -292,70 +307,77 @@ return FramingMirror(x: mirror.x, y: mirror.y,reflection: mirror.reflection,minY
 
       }
     }
+
+
 if(isWin)
   {
     return ;
   }
 
     for (var v in states) {
-      queue.add(v);
+      printGrid(v.grid!);
+      stack.push(v);
     }
-    BFS();
+
 
   }
 
-  Queue<List<List<Cell>>>queue= Queue<List<List<Cell>>>();
-  void BFS()
+  Queue<Game>queue= Queue<Game>();
+  // void BFS()
+  // {
+  //
+  //
+  //   while(queue.isNotEmpty)
+  //   {
+  //
+  //     var g = queue.removeFirst();
+  //
+  //     printGrid(g.grid!);
+  //     calculateLaserPath(gameModel.game!.laserPath!.first.x, gameModel.game!.laserPath!.first.y, gameModel.game!.laserPath!.first.currentDirection!, g);
+  //     if(isWin)
+  //     {
+  //       emit(GameWon());
+  //       UCS();
+  //
+  //       return ;
+  //
+  //     }
+  //     else {
+  //       getNextState(g);
+  //
+  //     }
+  //
+  //   }
+  //   if(isWin)
+  //   {
+  //
+  //     return ;
+  //   }
+  //
+  //   emit(GameLose());
+  //   return;
+  // }
+  Stack<Game> stack = Stack<Game>();
+  void Dfs(Game state )
   {
+    //calculateLaserPath(gameModel.game!.laserPath!.first.x, gameModel.game!.laserPath!.first.y, gameModel.game!.laserPath!.first.currentDirection!, state);
 
-
-    while(queue.isNotEmpty)
-    {
-
-      var g = queue.removeFirst();
-
-      printGrid(g);
-      calculateLaserPath(gameModel.game!.laser![0].x, gameModel.game!.laser![0].y, gameModel.game!.laser![0].currentDirection!, g);
-      if(isWin)
-      {
-        emit(GameWon());
-        return ;
-
-      }
-      else {
-        getNextState(g);
-
-      }
-
-    }
-    if(isWin)
-    {
-      return ;
-    }
-
-    emit(GameLose());
-    return;
-  }
-  Stack<List<List<Cell>>> stack = Stack<List<List<Cell>>>();
-  void Dfs()
-  {
-
-
+    stack.push(state);
     while(stack.isNotEmpty)
     {
-
       var g = stack.pop();
+      calculateLaserPath(gameModel.game!.laserPath!.first.x, gameModel.game!.laserPath!.first.y, gameModel.game!.laserPath!.first.currentDirection!, g);
+      gridToPrint=g.grid!.map((row)=>row.map((cell)=>cell).toList()).toList();
 
-       printGrid(g);
-      calculateLaserPath(gameModel.game!.laser![0].x, gameModel.game!.laser![0].y, gameModel.game!.laser![0].currentDirection!, g);
       if(isWin)
         {
+        //  printGrid(state.grid!);
 emit(GameWon());
+
           return ;
 
         }
-      else {
-         getNextState(g);
+      else {getNextState(g);
 
       }
 
@@ -369,7 +391,55 @@ emit(GameLose());
     return;
   }
 
+  void UCS (Game state) {
+    printGrid(state.grid!);
+    print('============================');
+    stateQueue.add(state);
 
+      while(stateQueue.isNotEmpty)
+        {
+
+          Game j =stateQueue.removeFirst();
+
+          calculateLaserPath(gameModel.game!.laserPath!.first.x, gameModel.game!.laserPath!.first.y, gameModel.game!.laserPath!.first.currentDirection!, j);
+          if(isWin)
+          {
+            emit(GameWon());
+
+            return ;
+
+          }
+          getNextState(j);
+
+
+
+
+        }
+    if(isWin)
+    {
+      return ;
+    }
+    emit(GameLose());
+  }
+
+  int calTheCost ({required Game childState, required Game fatherChild })
+  {
+    int cost =0;
+    for (int i=0;i<8;i++) {
+
+      for (int j=0;j<8;j++) {
+        if(fatherChild.grid![i][j] is Laser && childState.grid![i][j] is Empty )
+          {
+            cost++;
+          }
+      }
+
+      // Print newline for next row
+    }
+    return  cost ;
+  }
+
+5
 
 
 
@@ -417,48 +487,3 @@ class Stack<T> {
 
 
 
-// void getNextState(List<List<Cell>>gr){
-//   states.add(calculateLaserPath(gameModel.game!.laser![0].x, gameModel.game!.laser![0].y, gameModel.game!.laser![0].currentDirection!, gr));
-//   if(!isWin) {
-//     printGrid(gr);
-//     //calculateLaserPath(gameModel.game!.laser![0].x, gameModel.game!.laser![0].y, gameModel.game!.laser![0].currentDirection!, gr);
-//
-//     for (var e in laserPath) {
-//       int x = e.x;
-//       int y = e.y;
-//
-//
-//       if (!isVisited[x][y]) {
-//         if (gr[x][y] is FixedMirror45) {
-//           Mirror mirror = gr[x][y] as Mirror;
-//
-//
-//           gr[x][y] = FixedMirror45(x: x, y: y, reflection: (mirror.reflection + 45) % 360);
-//           getNextState(gr);
-//           gr[x][y] = FixedMirror45(x: x, y: y, reflection: (mirror.reflection + 90) % 360);
-//           getNextState(gr);
-//           gr[x][y] = FixedMirror45(x: x, y: y, reflection: (mirror.reflection + 180)%360);
-//           getNextState(gr);
-//           gr[x][y] = FixedMirror45(x: x, y: y, reflection: (mirror.reflection+270)%360);
-//           getNextState(gr);
-//         }
-//         isVisited[x][y] = true;
-//       }
-//       else {
-//         states.forEach((v){
-//           stack.push(v);
-//         });
-//         //Dfs();
-//       }
-//
-//     }
-//   }
-//
-//   return ;
-//
-//
-//
-//
-//
-//
-// }

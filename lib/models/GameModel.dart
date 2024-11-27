@@ -142,17 +142,30 @@ class Game {
     this.width,
     this.height,
     this.grid,
+    this.cost,
+    this.laserPath
 
   });
+
+  Game deepCopy() {
+    return Game(
+      width: width,
+      height: height,
+      cost: cost,
+      grid: grid?.map((row)=>row.map((cell)=>cell).toList()).toList(),
+      laserPath: laserPath?.map((laser) => laser).toSet(),
+    );
+  }
 
   Game.fromJson(dynamic json) {
     //print(json['laser']);
     width = json['width'];
     height = json['height'];
+    cost=json['cost'];
     if (json['Grid'] != null) {
 
       grid = [];
-      laser=[];
+      laserPath={};
 
 
       List<List<dynamic>> gridData = json['Grid'];
@@ -207,7 +220,7 @@ class Game {
 
 
 
-      laser!.add(Laser(x: v['x'], y: v['y'], currentDirection: Direction.values.byName(v['direction'])));
+      laserPath!.add(Laser(x: v['x'], y: v['y'], currentDirection: Direction.values.byName(v['direction'])));
 
     });}
 
@@ -217,12 +230,19 @@ class Game {
   int? width;
   int? height;
   List<List<Cell>>? grid;
-  List<Laser>?laser;
+  Set<Laser>?laserPath;
+  int ?cost ;
 
-  Game copyWith({  int? width,
+  Game copyWith({
+    int ?cost,
+    Set<Laser>?laser,
+    int? width,
     int? height,
     List<List<Cell>>? grid,
-  }) => Game(  width: width ?? this.width,
+  }) => Game(
+    cost: cost??this.cost,
+    laserPath: laser??this.laserPath,
+    width: width ?? this.width,
     height: height ?? this.height,
     grid: grid ?? this.grid,
   );

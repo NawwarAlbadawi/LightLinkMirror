@@ -23,7 +23,7 @@ class GameViewBody extends StatelessWidget {
 
 
     return BlocProvider(
-      create: (context)=>GameCubit(gameModel),
+      create: (context)=>GameCubit(gameModel)..init(),
       child: BlocConsumer<GameCubit,GameState>(
         listener: (context,state){
 print(state);
@@ -74,7 +74,7 @@ print(state);
                       itemBuilder: (context,index){
                         int row = index ~/ cubit.gameModel.game !.grid![0].length;
                         int col = index % cubit.gameModel.game !.grid![0].length;
-                         cell = cubit.gameModel.game !.grid![row][col];
+                         cell = cubit.gridToPrint[row][col];
                         return Container(
                           decoration:  BoxDecoration(
                             color:Colors.lightGreen,
